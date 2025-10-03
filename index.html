@@ -9,10 +9,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <!-- Chosen Palette: Warm Neutrals with Teal Accent -->
-    <!-- Application Structure Plan: A single-page, vertical scroll application with a sticky nav. The core is an interactive dashboard for comparing methodologies, followed by a 'deep dive' section on gamification scopes, an explanation of Design Thinking's cyclical role, and a final summary chart. This structure transforms the static report into an exploratory journey, allowing users to compare, drill down, and synthesize the information in a non-linear, engaging way, which is superior to just reading a document. -->
-    <!-- Visualization & Content Choices: 1. Main Comparison: Interactive cards (HTML/JS) instead of a static table to promote active clicking and focused reading. Goal: Compare. 2. Gamification Scopes: Clickable tabs to show/hide details. Goal: Organize & Inform. 3. Design Thinking: A CSS-based circular diagram to visualize the process flow. Goal: Organize. 4. Summary: A Chart.js scatter plot to synthesize the relationships between strategies based on two key axes (Game Integration vs. Focus). Goal: Relationships. All choices avoid static presentation and encourage user interaction. Confirmed NO SVG/Mermaid. -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -72,6 +68,24 @@
                 height: 500px; 
             } 
         }
+
+        /* Styles for the new interactive section */
+        .challenge-option {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .challenge-option:hover {
+            background-color: #f0fdfa; /* Teal-50 */
+            border-color: #0D9488; /* Teal-700 */
+        }
+        .challenge-option.selected {
+            background-color: #CCFBF1; /* Teal-100 */
+            border-color: #0D9488; /* Teal-700 */
+            box-shadow: 0 0 0 3px #99F6E4; /* Teal-200 ring */
+        }
+        #challenge-result {
+            min-height: 250px;
+        }
     </style>
 </head>
 <body class="antialiased">
@@ -82,6 +96,7 @@
             <div class="hidden md:flex space-x-8">
                 <a href="#comparador" class="nav-link text-gray-600 font-semibold pb-1">Comparador</a>
                 <a href="#gamificacion" class="nav-link text-gray-600 font-semibold pb-1">Alcance</a>
+                <a href="#desafio" class="nav-link text-gray-600 font-semibold pb-1">Desafío Práctico</a>
                 <a href="#design-thinking" class="nav-link text-gray-600 font-semibold pb-1">Design Thinking</a>
                 <a href="#sintesis" class="nav-link text-gray-600 font-semibold pb-1">Síntesis</a>
             </div>
@@ -143,7 +158,53 @@
             </div>
         </section>
 
-        <section id="design-thinking" class="py-16">
+        <!-- Nueva Sección Interactiva -->
+        <section id="desafio" class="py-16">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold text-gray-800">El Desafío de la Llama Activa: ¡Manos a la Obra!</h3>
+                    <p class="text-gray-500 mt-2">Usted es el Arquitecto del Aprendizaje. Elija la estrategia más adecuada para el objetivo. Tema: **Enlace Iónico y Covalente**.</p>
+                </div>
+
+                <div id="challenge-container" class="max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-2xl border-t-4 border-teal-600">
+                    
+                    <h4 class="text-2xl font-bold text-gray-800 mb-6">Objetivo: Reforzar el Contenido (Práctica)</h4>
+
+                    <div class="bg-teal-50 p-4 rounded-lg mb-6">
+                        <p class="font-semibold text-teal-800">Tarea a resolver:</p>
+                        <p class="text-gray-700">Necesito una actividad corta de 15 minutos que permita a los estudiantes **practicar la clasificación rápida** de 10 compuestos entre iónicos y covalentes, y recibir *feedback inmediato*.</p>
+                    </div>
+
+                    <h5 class="font-bold text-xl mb-4 text-gray-700">Elija la Estrategia Óptima:</h5>
+                    
+                    <div class="grid md:grid-cols-3 gap-4 mb-8">
+                        <div class="challenge-option p-4 rounded-lg border-2 border-gray-200" data-strategy-type="abj-quick">
+                            <span class="text-3xl block mb-2">🕹️</span>
+                            <p class="font-bold text-lg">Aprendizaje Basado en Juegos (ABJ)</p>
+                            <p class="text-sm text-gray-500">Juego de trivia con puntos y temporizador.</p>
+                        </div>
+                        <div class="challenge-option p-4 rounded-lg border-2 border-gray-200" data-strategy-type="gamificacion-quick">
+                            <span class="text-3xl block mb-2">🎮</span>
+                            <p class="font-bold text-lg">Gamificación (Micro)</p>
+                            <p class="text-sm text-gray-500">Narrativa de "Agentes Secretos" para las 15 min.</p>
+                        </div>
+                        <div class="challenge-option p-4 rounded-lg border-2 border-gray-200" data-strategy-type="abpr-quick">
+                            <span class="text-3xl block mb-2">🧠</span>
+                            <p class="font-bold text-lg">Aprendizaje Basado en Retos (ABPr)</p>
+                            <p class="text-sm text-gray-500">Diseñar un nuevo tipo de enlace para la sociedad del futuro.</p>
+                        </div>
+                    </div>
+
+                    <div id="challenge-result" class="mt-8 p-6 rounded-lg bg-gray-50 border border-gray-200">
+                        <p class="text-gray-600 text-center">Seleccione una estrategia para ver la aplicación y el razonamiento detrás de ella.</p>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+        <!-- Fin Nueva Sección Interactiva -->
+
+        <section id="design-thinking" class="py-16 bg-gray-50">
             <div class="container mx-auto px-6">
                 <div class="text-center mb-12">
                     <h3 class="text-3xl font-bold text-gray-800">Design Thinking: La Plantilla Maestra</h3>
@@ -179,7 +240,7 @@
             </div>
         </section>
 
-        <section id="sintesis" class="py-16 bg-teal-50/50">
+        <section id="sintesis" class="py-16">
              <div class="container mx-auto px-6">
                 <div class="text-center mb-12">
                     <h3 class="text-3xl font-bold text-gray-800">Síntesis Visual de Estrategias</h3>
@@ -187,7 +248,7 @@
                 </div>
                 
                 <!-- Gráfico Chart.js -->
-                <div class="chart-container">
+                <div class="chart-container bg-teal-50/50 p-4 rounded-xl shadow-inner">
                     <canvas id="synthesisChart"></canvas>
                 </div>
 
@@ -247,6 +308,7 @@
     <script>
     document.addEventListener('DOMContentLoaded', () => {
 
+        // --- Data Definitions (Same as before) ---
         const strategiesData = {
             gamificacion: [
                 { title: 'Intención Principal', content: '<strong>Motivación Intrínseca y Compromiso.</strong> Es el "Alma" del curso, busca enganchar al estudiante.' },
@@ -286,6 +348,41 @@
             }
         };
 
+        const challengeContent = {
+            'abj-quick': {
+                color: 'bg-orange-100 border-orange-500',
+                title: '✅ ¡Elección Óptima! Aprendizaje Basado en Juegos (ABJ)',
+                reason: 'Para **clasificar y practicar rápidamente** y recibir **feedback inmediato**, el ABJ es el más eficiente. Utiliza un juego completo (como un quiz interactivo tipo Kahoot! o Wordwall) cuyo *propósito principal* es la práctica del contenido. El juego ES el mecanismo de enseñanza.',
+                strategy: `<h5 class="font-bold text-xl mb-2 text-orange-700">Propuesta ABJ (5-10 minutos)</h5>
+                           <ul class="list-disc ml-5 space-y-1 text-gray-700">
+                               <li>**Juego:** "Clasificador de Enlaces" (por ejemplo, en Genially o Educaplay).</li>
+                               <li>**Mecánica:** Los estudiantes arrastran 10 compuestos a la caja de "Iónico" o "Covalente" bajo un límite de tiempo.</li>
+                               <li>**Feedback:** El juego corrige al instante, mostrando la puntuación final y la retroalimentación visual (verde/rojo).</li>
+                           </ul>`
+            },
+            'gamificacion-quick': {
+                color: 'bg-teal-100 border-teal-500',
+                title: '⚠️ ¡Posible Exceso! Gamificación (Micro)',
+                reason: 'La Gamificación funciona, pero **es menos eficiente** para una tarea de práctica pura de 15 minutos. Introducir una narrativa de "Agentes Secretos" o "Puntos de XP" consume tiempo de explicación y no mejora directamente la clasificación. Es más útil para motivar una unidad completa.',
+                strategy: `<h5 class="font-bold text-xl mb-2 text-teal-700">Propuesta Gamificación (Micro)</h5>
+                           <ul class="list-disc ml-5 space-y-1 text-gray-700">
+                               <li>**Mecánica:** La clasificación de 10 compuestos otorga **100 Puntos de XP** para la unidad total del curso.</li>
+                               <li>**Limitación:** La micro-narrativa ("Desbloquear el siguiente nivel") puede ser forzada y robar tiempo al ejercicio práctico.</li>
+                           </ul>`
+            },
+            'abpr-quick': {
+                color: 'bg-blue-100 border-blue-500',
+                title: '❌ ¡Estrategia Incorrecta! Aprendizaje Basado en Retos (ABPr)',
+                reason: 'El ABPr se enfoca en **habilidades complejas y soluciones reales**, no en la práctica de conceptos básicos. Diseñar un nuevo enlace iónico requeriría horas de investigación, no 15 minutos de práctica. Su foco es el proceso, no la clasificación.',
+                strategy: `<h5 class="font-bold text-xl mb-2 text-blue-700">Propuesta ABPr (Largo Plazo)</h5>
+                           <ul class="list-disc ml-5 space-y-1 text-gray-700">
+                               <li>**Reto (Real):** "Diseñar un compuesto innovador para la próxima generación de baterías sustentables".</li>
+                               <li>**Conclusión:** Esta estrategia es excelente para el proyecto final, pero totalmente inadecuada para un ejercicio rápido de 15 minutos.</li>
+                           </ul>`
+            }
+        };
+
+        // --- Interactive Comparison Logic (Same as before) ---
         const strategySelector = document.getElementById('strategy-selector');
         const strategyDetails = document.getElementById('strategy-details');
 
@@ -315,6 +412,7 @@
         
         updateStrategyView('gamificacion');
 
+        // --- Scope Logic (Same as before) ---
         const scopeSelector = document.getElementById('scope-selector');
         const scopeDetails = document.getElementById('scope-details');
         
@@ -340,6 +438,34 @@
 
         updateScopeView('micro');
 
+        // --- Challenge Logic (New Section) ---
+        const challengeOptions = document.querySelectorAll('.challenge-option');
+        const challengeResult = document.getElementById('challenge-result');
+
+        challengeOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                // Remove 'selected' from all options
+                challengeOptions.forEach(opt => opt.classList.remove('selected'));
+                // Add 'selected' to the clicked option
+                option.classList.add('selected');
+
+                const type = option.dataset.strategyType;
+                const result = challengeContent[type];
+
+                challengeResult.className = `mt-8 p-6 rounded-lg shadow-inner ${result.color} border-l-4`;
+                challengeResult.innerHTML = `
+                    <h5 class="text-2xl font-bold mb-3 ${result.color.replace('bg-', 'text-').replace('-100', '-700')}">${result.title}</h5>
+                    <p class="font-semibold text-gray-700 mb-4">Razón Clave:</p>
+                    <p class="text-gray-800 mb-4">${result.reason}</p>
+                    <p class="font-semibold text-gray-700 mb-2">Implementación Sugerida:</p>
+                    <div class="p-4 bg-white rounded-lg shadow-sm">
+                        ${result.strategy}
+                    </div>
+                `;
+            });
+        });
+
+        // --- Chart Logic (Same as before) ---
         const ctx = document.getElementById('synthesisChart').getContext('2d');
         const synthesisChart = new Chart(ctx, {
             type: 'scatter',
@@ -406,6 +532,7 @@
             }
         });
         
+        // --- Navigation Logic (Same as before) ---
         const navLinks = document.querySelectorAll('.nav-link');
         const sections = document.querySelectorAll('main section');
         
