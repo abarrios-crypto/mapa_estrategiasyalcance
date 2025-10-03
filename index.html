@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa Interactivo de Estrategias Activas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals with Teal Accent -->
+    <!-- Application Structure Plan: A single-page, vertical scroll application with a sticky nav. The core is an interactive dashboard for comparing methodologies, followed by a 'deep dive' section on gamification scopes, an explanation of Design Thinking's cyclical role, and a final summary chart. This structure transforms the static report into an exploratory journey, allowing users to compare, drill down, and synthesize the information in a non-linear, engaging way, which is superior to just reading a document. -->
+    <!-- Visualization & Content Choices: 1. Main Comparison: Interactive cards (HTML/JS) instead of a static table to promote active clicking and focused reading. Goal: Compare. 2. Gamification Scopes: Clickable tabs to show/hide details. Goal: Organize & Inform. 3. Design Thinking: A CSS-based circular diagram to visualize the process flow. Goal: Organize. 4. Summary: A Chart.js scatter plot to synthesize the relationships between strategies based on two key axes (Game Integration vs. Focus). Goal: Relationships. All choices avoid static presentation and encourage user interaction. Confirmed NO SVG/Mermaid. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF8;
+            color: #4A4A4A;
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link:hover {
+            color: #0D9488;
+        }
+        .nav-link.active {
+            color: #0D9488;
+            border-bottom: 2px solid #0D9488;
+        }
+        .strategy-btn {
+            transition: all 0.3s;
+        }
+        .strategy-btn.active {
+            background-color: #0D9488;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(13, 148, 136, 0.2);
+        }
+        .content-card {
+            transition: opacity 0.5s, transform 0.5s;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        .content-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .scope-btn.active {
+            background-color: #14B8A6;
+            color: white;
+        }
+        .dt-cycle-item {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .dt-cycle-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        .chart-container { 
+            position: relative; 
+            width: 100%; 
+            max-width: 800px; 
+            margin-left: auto; 
+            margin-right: auto; 
+            height: 400px;
+            max-height: 50vh; 
+        }
+        @media (min-width: 768px) { 
+            .chart-container { 
+                height: 500px; 
+            } 
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-teal-700">Estrategias Activas</h1>
+            <div class="hidden md:flex space-x-8">
+                <a href="#comparador" class="nav-link text-gray-600 font-semibold pb-1">Comparador</a>
+                <a href="#gamificacion" class="nav-link text-gray-600 font-semibold pb-1">Alcance</a>
+                <a href="#design-thinking" class="nav-link text-gray-600 font-semibold pb-1">Design Thinking</a>
+                <a href="#sintesis" class="nav-link text-gray-600 font-semibold pb-1">Síntesis</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="hero" class="py-20 bg-teal-50/50">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="text-4xl md:text-5xl font-bold text-teal-800 mb-4">El Mapa Interactivo de Estrategias Activas</h2>
+                <p class="text-lg text-gray-600 max-w-3xl mx-auto">Una guía para el Arquitecto del Aprendizaje. Explore, compare y comprenda las diferencias clave entre Gamificación, ABJ, ABPr y Design Thinking para encender la Llama Activa en su aula.</p>
+            </div>
+        </section>
+
+        <section id="comparador" class="py-16">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold text-gray-800">Comparador de Metodologías</h3>
+                    <p class="text-gray-500 mt-2">Seleccione una estrategia para descubrir su intención, estructura y rol en el aprendizaje.</p>
+                </div>
+
+                <div id="strategy-selector" class="flex flex-wrap justify-center gap-4 mb-8">
+                    <button class="strategy-btn active text-lg font-semibold py-3 px-6 rounded-lg bg-white shadow-md border border-gray-200 text-teal-700" data-strategy="gamificacion">🎮 Gamificación</button>
+                    <button class="strategy-btn text-lg font-semibold py-3 px-6 rounded-lg bg-white shadow-md border border-gray-200 text-teal-700" data-strategy="abj">🕹️ Aprendizaje Basado en Juegos</button>
+                    <button class="strategy-btn text-lg font-semibold py-3 px-6 rounded-lg bg-white shadow-md border border-gray-200 text-teal-700" data-strategy="abpr">🧠 Aprendizaje Basado en Retos</button>
+                </div>
+
+                <div id="strategy-details" class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                </div>
+            </div>
+        </section>
+
+        <section id="gamificacion" class="py-16 bg-gray-50">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold text-gray-800">El Alcance de la Gamificación</h3>
+                    <p class="text-gray-500 mt-2">No toda gamificación es igual. Su impacto depende de la escala de implementación.</p>
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-6">
+                    <div class="md:w-1/3">
+                        <div id="scope-selector" class="flex md:flex-col gap-4">
+                            <button class="scope-btn active w-full text-left font-semibold p-4 rounded-lg bg-white shadow" data-scope="micro">
+                                <span class="text-2xl mr-3">🔬</span> Microgamificación
+                            </button>
+                             <button class="scope-btn w-full text-left font-semibold p-4 rounded-lg bg-white shadow" data-scope="unidad">
+                                <span class="text-2xl mr-3">📚</span> Gamificación de Unidad
+                            </button>
+                             <button class="scope-btn w-full text-left font-semibold p-4 rounded-lg bg-white shadow" data-scope="curso">
+                                <span class="text-2xl mr-3">🏛️</span> Gamificación de Curso
+                            </button>
+                        </div>
+                    </div>
+                    <div class="md:w-2/3">
+                        <div id="scope-details" class="bg-white p-6 rounded-lg shadow-lg min-h-[300px]">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="design-thinking" class="py-16">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold text-gray-800">Design Thinking: La Plantilla Maestra</h3>
+                    <p class="text-gray-500 mt-2">Es el marco metodológico para diseñar experiencias de aprendizaje centradas en el estudiante.</p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-6 text-center">
+                    <div class="dt-cycle-item bg-white p-6 rounded-lg shadow-md border-t-4 border-teal-500">
+                        <div class="text-4xl mb-3">🤝</div>
+                        <h4 class="font-bold text-lg mb-2">1. Empatizar</h4>
+                        <p class="text-sm text-gray-600">Comprender las motivaciones y frustraciones del estudiante.</p>
+                    </div>
+                    <div class="dt-cycle-item bg-white p-6 rounded-lg shadow-md border-t-4 border-teal-500">
+                        <div class="text-4xl mb-3">🎯</div>
+                        <h4 class="font-bold text-lg mb-2">2. Definir</h4>
+                        <p class="text-sm text-gray-600">Formular el reto de aprendizaje y el objetivo curricular claro.</p>
+                    </div>
+                    <div class="dt-cycle-item bg-white p-6 rounded-lg shadow-md border-t-4 border-teal-500">
+                        <div class="text-4xl mb-3">💡</div>
+                        <h4 class="font-bold text-lg mb-2">3. Idear</h4>
+                        <p class="text-sm text-gray-600">Generar soluciones y elegir la metodología activa adecuada.</p>
+                    </div>
+                    <div class="dt-cycle-item bg-white p-6 rounded-lg shadow-md border-t-4 border-teal-500">
+                        <div class="text-4xl mb-3">🛠️</div>
+                        <h4 class="font-bold text-lg mb-2">4. Prototipar</h4>
+                        <p class="text-sm text-gray-600">Crear una versión de prueba de la actividad o sistema.</p>
+                    </div>
+                    <div class="dt-cycle-item bg-white p-6 rounded-lg shadow-md border-t-4 border-teal-500">
+                        <div class="text-4xl mb-3">🧪</div>
+                        <h4 class="font-bold text-lg mb-2">5. Probar</h4>
+                        <p class="text-sm text-gray-600">Evaluar la experiencia y refinarla con feedback real.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="sintesis" class="py-16 bg-teal-50/50">
+             <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold text-gray-800">Síntesis Visual de Estrategias</h3>
+                    <p class="text-gray-500 mt-2">Un mapa para ubicar cada metodología según su foco y nivel de integración del juego.</p>
+                </div>
+                
+                <!-- Gráfico Chart.js -->
+                <div class="chart-container">
+                    <canvas id="synthesisChart"></canvas>
+                </div>
+
+                <!-- START: Explicación de la Síntesis Visual simplificada (MOVIDA ABAJO) -->
+                <div class="mt-10 max-w-4xl mx-auto space-y-8">
+                    <h4 class="text-3xl font-bold text-gray-800 pt-6 text-center">Clave de Decodificación del Mapa (La Llama Activa)</h4>
+                    
+                    <div class="p-6 bg-white rounded-xl shadow-lg border-l-4 border-teal-500">
+                        <h4 class="text-2xl font-bold text-teal-700 mb-3">Eje X (Horizontal): El Foco de la Llama: ¿Qué buscamos encender?</h4>
+                        <p class="text-gray-600 mb-4">Este eje define el **Objetivo Primario** de la estrategia didáctica, de la habilidad a la memorización:</p>
+                        <ul class="list-disc ml-6 space-y-2 text-gray-700">
+                            <li><strong class="text-teal-600">Izquierda (Proceso/Habilidad):</strong> El aprendizaje es el **subproducto** de resolver un gran reto. El foco es el **pensamiento crítico** y la **colaboración**. (Ej. ABPr).</li>
+                            <li><strong class="text-teal-600">Derecha (Contenido/Motivación):</strong> El aprendizaje es el **objetivo directo** (dominar un tema, memorizar conceptos). El foco es la **retención** y el **compromiso** con el currículo. (Ej. ABJ, Gamificación).</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="p-6 bg-white rounded-xl shadow-lg border-l-4 border-teal-500">
+                        <h4 class="text-2xl font-bold text-teal-700 mb-3">Eje Y (Vertical): El Combustible Lúdico: ¿Qué tan Fuerte Arde el Juego?</h4>
+                        <p class="text-gray-600 mb-4">Mide la intensidad de los elementos de juego utilizados en la estructura de la actividad:</p>
+                        <ul class="list-disc ml-6 space-y-2 text-gray-700">
+                            <li><strong class="text-teal-600">Abajo (Fuego Lento):</strong> **Estructura Real.** El trabajo se basa en la **seriedad** de un problema auténtico o reto de la vida real. No hay reglas lúdicas. (Ej. ABPr).</li>
+                            <li><strong class="text-teal-600">Arriba (Llama Viva):</strong> **Estructura de Juego Total.** La actividad utiliza una **capa completa** de juego (XP, narrativa de misiones, niveles). El juego es el marco. (Ej. ABJ, Gamificación).</li>
+                        </ul>
+                    </div>
+
+                    <h4 class="text-3xl font-bold text-gray-800 pt-6 text-center">En Resumen: Posicionamiento de la Llama</h4>
+                    <div class="grid md:grid-cols-3 gap-6 pb-8">
+                        <!-- ABPr -->
+                        <div class="bg-blue-50 p-5 rounded-xl shadow-md border-t-4 border-blue-600">
+                            <h5 class="font-bold text-xl text-blue-800 mb-2">🧠 ABPr (Aprendizaje Basado en Retos)</h5>
+                            <p class="text-gray-700">Se ubica en **Habilidades (Izquierda) + Fuego Lento (Abajo)**. Es para **construir soluciones** a problemas complejos.</p>
+                        </div>
+                        <!-- Gamificación -->
+                        <div class="bg-teal-50 p-5 rounded-xl shadow-md border-t-4 border-teal-600">
+                            <h5 class="font-bold text-xl text-teal-800 mb-2">🎮 Gamificación</h5>
+                            <p class="text-gray-700">Se ubica en **Contenido (Derecha) + Llama Viva (Arriba)**. Es la **capa mágica** que motiva el currículo tradicional.</p>
+                        </div>
+                        <!-- ABJ -->
+                        <div class="bg-orange-50 p-5 rounded-xl shadow-md border-t-4 border-orange-600">
+                            <h5 class="font-bold text-xl text-orange-800 mb-2">🕹️ ABJ (Aprendizaje Basado en Juegos)</h5>
+                            <p class="text-gray-700">Se ubica en **Contenido Extremo (Extrema Derecha) + Llama Viva (Arriba)**. El juego **es el vehículo** de enseñanza.</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- END: Explicación de la Síntesis Visual simplificada -->
+                
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-6 text-center text-sm">
+            <p>© 2025 Mapa Interactivo de Estrategias Activas | Adriana A. Barrios Rodríguez | Diplomado en Gamificación en Entornos Digitales para la Docencia Universitaria | UAS | SAU | DGES | Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const strategiesData = {
+            gamificacion: [
+                { title: 'Intención Principal', content: '<strong>Motivación Intrínseca y Compromiso.</strong> Es el "Alma" del curso, busca enganchar al estudiante.' },
+                { title: 'Estructura', content: 'Aplica elementos de juego (Puntos, Insignias, Narrativa) a un contexto <strong>NO lúdico</strong>.' },
+                { title: 'Contenido', content: 'El contenido curricular <strong>preexiste</strong> y se mantiene intacto.' },
+                { title: 'Rol del Juego', content: 'Es una <strong>Capa</strong> que se añade a la experiencia de aprendizaje existente.' }
+            ],
+            abj: [
+                { title: 'Intención Principal', content: '<strong>Enseñanza de Conceptos Específicos</strong> o práctica inmersiva de habilidades.' },
+                { title: 'Estructura', content: 'Utiliza un <strong>Juego completo</strong> (videojuego, quiz interactivo, simulador) como la herramienta didáctica central.' },
+                { title: 'Contenido', content: 'El aprendizaje <strong>ocurre DENTRO</strong> de la mecánica y las reglas del juego.' },
+                { title: 'Rol del Juego', content: 'Es el <strong>Vehículo</strong> que transporta el contenido y la práctica.' }
+            ],
+            abpr: [
+                { title: 'Intención Principal', content: '<strong>Desarrollo de Habilidades</strong> críticas, colaboración y Aprendizaje Significativo.' },
+                { title: 'Estructura', content: 'Se organiza alrededor de la <strong>resolución</strong> de una pregunta o problema complejo y real.' },
+                { title: 'Contenido', content: 'El conocimiento <strong>se adquiere MIENTRAS</strong> se investiga y se resuelve el reto.' },
+                { title: 'Rol del Juego', content: 'Es <strong>Nulo</strong> en su estado puro. Es una metodología de trabajo, no un juego.' }
+            ]
+        };
+
+        const scopesData = {
+            micro: {
+                title: '🔬 Microgamificación',
+                description: 'Aplicación breve y puntual de un elemento de juego para una <strong>actividad de 5-20 minutos.</strong> Ideal para iniciar, cerrar o evaluar formativamente una clase.',
+                example: '<strong>Ejemplo (Clase de Programación):</strong> Usar Kahoot! para un quiz rápido de 5 preguntas sobre sintaxis. El ganador desbloquea un "Pase Rápido" para la siguiente tarea.'
+            },
+            unidad: {
+                title: '📚 Gamificación de Unidad',
+                description: 'La capa de juego se aplica a un <strong>bloque curricular completo (ej. 3-5 semanas).</strong> Requiere una narrativa y un objetivo de progresión claro para mantener el impulso.',
+                example: '<strong>Ejemplo (Clase de Programación):</strong> Unidad "Bases de Datos" se convierte en la misión "Recuperar el Servidor Perdido". Cada subtema es un nivel que otorga Insignias y Puntos de Experiencia (XP).'
+            },
+            curso: {
+                title: '🏛️ Gamificación de Curso Completo',
+                description: 'El juego es el <strong>sistema operativo de todo el semestre</strong>, influyendo en la calificación, el comportamiento y el rol del estudiante. Es una inmersión total.',
+                example: '<strong>Ejemplo (Clase de Programación):</strong> El curso es el "Gremio de Ingenieros del Futuro". Los estudiantes son "Aprendices" que suben de nivel con XP. Las tareas son "Misiones" y los exámenes "Pruebas de Maestría".'
+            }
+        };
+
+        const strategySelector = document.getElementById('strategy-selector');
+        const strategyDetails = document.getElementById('strategy-details');
+
+        function updateStrategyView(strategyKey) {
+            const data = strategiesData[strategyKey];
+            strategyDetails.innerHTML = ''; 
+            
+            data.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'content-card bg-white p-6 rounded-lg shadow-lg border-l-4 border-teal-500';
+                card.innerHTML = `<h4 class="font-bold text-xl mb-2 text-teal-800">${item.title}</h4><p class="text-gray-600">${item.content}</p>`;
+                strategyDetails.appendChild(card);
+                setTimeout(() => card.classList.add('visible'), 100 * index);
+            });
+
+            document.querySelectorAll('.strategy-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.strategy === strategyKey);
+            });
+        }
+
+        strategySelector.addEventListener('click', (e) => {
+            if (e.target.closest('.strategy-btn')) {
+                const strategyKey = e.target.closest('.strategy-btn').dataset.strategy;
+                updateStrategyView(strategyKey);
+            }
+        });
+        
+        updateStrategyView('gamificacion');
+
+        const scopeSelector = document.getElementById('scope-selector');
+        const scopeDetails = document.getElementById('scope-details');
+        
+        function updateScopeView(scopeKey) {
+            const data = scopesData[scopeKey];
+            scopeDetails.innerHTML = `
+                <h4 class="font-bold text-2xl mb-4 text-teal-800">${data.title}</h4>
+                <p class="text-gray-700 mb-4">${data.description}</p>
+                <div class="bg-teal-50 p-4 rounded-md border-l-4 border-teal-300">
+                    <p class="text-gray-600">${data.example}</p>
+                </div>`;
+            document.querySelectorAll('.scope-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.scope === scopeKey);
+            });
+        }
+        
+        scopeSelector.addEventListener('click', (e) => {
+            if (e.target.closest('.scope-btn')) {
+                const scopeKey = e.target.closest('.scope-btn').dataset.scope;
+                updateScopeView(scopeKey);
+            }
+        });
+
+        updateScopeView('micro');
+
+        const ctx = document.getElementById('synthesisChart').getContext('2d');
+        const synthesisChart = new Chart(ctx, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: 'Gamificación',
+                    data: [{x: 7, y: 7}],
+                    backgroundColor: 'rgba(13, 148, 136, 0.7)',
+                    pointRadius: 15,
+                    pointHoverRadius: 20,
+                }, {
+                    label: 'Aprendizaje Basado en Juegos (ABJ)',
+                    data: [{x: 9, y: 9}],
+                    backgroundColor: 'rgba(249, 115, 22, 0.7)',
+                    pointRadius: 15,
+                    pointHoverRadius: 20,
+                }, {
+                    label: 'Aprendizaje Basado en Retos (ABPr)',
+                    data: [{x: 2, y: 3}],
+                    backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                    pointRadius: 15,
+                    pointHoverRadius: 20,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'FOCO PRINCIPAL → (Proceso/Habilidad a Contenido/Motivación)',
+                            font: { size: 14 }
+                        },
+                        min: 0,
+                        max: 10,
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'GRADO DE INTEGRACIÓN DEL JUEGO →',
+                            font: { size: 14 }
+                        },
+                        min: 0,
+                        max: 10
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label;
+                            }
+                        },
+                        displayColors: false,
+                        titleFont: { size: 0 },
+                        bodyFont: { size: 14, weight: 'bold' },
+                        padding: 12,
+                    }
+                }
+            }
+        });
+        
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('main section');
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if(pageYOffset >= sectionTop - 100){
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if(link.getAttribute('href') === `#${current}`){
+                    link.classList.add('active');
+                }
+            })
+        });
+
+    });
+    </script>
+</body>
+</html>
